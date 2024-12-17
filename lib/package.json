@@ -15,7 +15,14 @@
     "url": "https://github.com/nerdyman"
   },
   "description": "Display a set of images as a draggable 360 degree turntable.",
-  "keywords": ["react", "image", "360", "turntable", "rotator", "slider"],
+  "keywords": [
+    "react",
+    "image",
+    "360",
+    "turntable",
+    "rotator",
+    "slider"
+  ],
   "engines": {
     "node": ">=18.0.0"
   },
@@ -37,7 +44,10 @@
       }
     }
   },
-  "files": ["src", "dist"],
+  "files": [
+    "src",
+    "dist"
+  ],
   "scripts": {
     "analyze": "ANALYZE=true pnpx esbuild-visualizer --metadata ./dist/metafile-esm.json",
     "start": "concurrently -k -s first -n \"tsup,ts\" -c \"blue,cyan\" \"tsup --watch\" \"pnpm run check:types --watch --preserveWatchOutput\"",
@@ -46,7 +56,7 @@
     "release:preflight": "cp ../README.md ../LICENSE . && pnpm run -w lint && pnpm run -w test && ANALYZE=false pnpm run build && pnpm run check",
     "release:publish": "release-it",
     "check": "concurrently -n \"package,types\" -c \"blue,magenta\" \"pnpm run check:package\" \"pnpm run check:types\"",
-    "check:package": "attw -P . && publint",
+    "check:package": "attw -P . --profile node16 && publint",
     "check:types": "tsc --noEmit"
   },
   "browserslist": {
@@ -60,14 +70,18 @@
       "not ie > 0",
       "not op_mini all"
     ],
-    "development": ["last 1 chrome version", "last 1 firefox version", "last 1 safari version"]
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   },
   "peerDependencies": {
     "react": ">=16.8",
     "react-dom": ">=16.8"
   },
   "devDependencies": {
-    "@arethetypeswrong/cli": "^0.16.4",
+    "@arethetypeswrong/cli": "^0.17.1",
     "@types/node": "^22.7.7",
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.1",
@@ -75,7 +89,7 @@
     "concurrently": "^9.0.1",
     "esbuild-plugin-babel": "^0.2.3",
     "esbuild-plugin-browserslist": "^0.15.0",
-    "publint": "^0.2.11",
+    "publint": "^0.2.12",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "release-it": "^17.10.0",
