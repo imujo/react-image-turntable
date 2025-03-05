@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { UseReactImageTurntableProps, UseReactImageTurntableReturn } from './types.js';
 
@@ -10,33 +10,44 @@ export const useReactImageTurntable = ({
   images,
   movementSensitivity = 20,
   onIndexChange,
+  setActiveImageIndex,
+  activeImageIndex,
 }: UseReactImageTurntableProps): UseReactImageTurntableReturn => {
   const imagesCount = images.length - 1;
   const { interval: autoRotateInterval = 200, enabled: autoRotateIsEnabled = false } = autoRotate;
-  const [activeImageIndex, setActiveImageIndexUnsafe] = useState(initialImageIndex);
+  const [activeImageIndexUnsafe, setActiveImageIndexUnsafe] = useState(initialImageIndex);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const turntableRef = useRef<HTMLDivElement>(null);
+
+  const setActiveImageIndexInternal = useCallback(
+    setActiveImageIndex ?? setActiveImageIndexUnsafe,
+    [],
+  );
+
+  const activeImageIndexInternal = useMemo(() => {
+    return activeImageIndex ?? activeImageIndexUnsafe;
+  }, [activeImageIndexUnsafe, activeImageIndex]);
 
   /**
    * Safely set the image index with fallback to 0 if the index is out of bounds.
    */
-  const setActiveImageIndex = useCallback(
+  const setActiveImageIndexSafe = useCallback(
     (index: number) => {
       const nextIndex = index > imagesCount ? 0 : index < 0 ? imagesCount : index;
-      setActiveImageIndexUnsafe(nextIndex);
+      setActiveImageIndexInternal(nextIndex);
     },
-    [imagesCount],
+    [imagesCount, setActiveImageIndexInternal],
   );
 
   // Handle image count changes.
   useEffect(() => {
-    if (activeImageIndex > imagesCount) setActiveImageIndexUnsafe(0);
-  }, [activeImageIndex, imagesCount]);
+    if (activeImageIndexInternal > imagesCount) setActiveImageIndexInternal(0);
+  }, [activeImageIndexInternal, imagesCount, setActiveImageIndexInternal]);
 
   // Handle `onIndexChange` callback.
   useEffect(() => {
-    if (onIndexChange) onIndexChange(activeImageIndex);
-  }, [activeImageIndex, onIndexChange]);
+    if (onIndexChange) onIndexChange(activeImageIndexInternal);
+  }, [activeImageIndexInternal, onIndexChange]);
 
   // Control autorotation.
   useEffect(() => {
@@ -49,7 +60,7 @@ export const useReactImageTurntable = ({
 
     if (autoRotateIsEnabled && !intervalRef.current) {
       intervalRef.current = setInterval(() => {
-        setActiveImageIndexUnsafe((prevIndex) => {
+        setActiveImageIndexInternal((prevIndex) => {
           const nextIndex = prevIndex + 1;
           return nextIndex > imagesCount ? 0 : nextIndex;
         });
@@ -61,7 +72,7 @@ export const useReactImageTurntable = ({
     }
 
     return () => clearAutoRotateInterval();
-  }, [autoRotateInterval, autoRotateIsEnabled, imagesCount]);
+  }, [autoRotateInterval, autoRotateIsEnabled, imagesCount, setActiveImageIndexInternal]);
 
   // Event bindings.
   useEffect(() => {
@@ -69,14 +80,14 @@ export const useReactImageTurntable = ({
     let prevDragPosition = 0;
 
     const incrementActiveIndex = () => {
-      setActiveImageIndexUnsafe((prev) => {
+      setActiveImageIndexInternal((prev) => {
         const next = prev + 1 > imagesCount ? 0 : prev + 1;
         return next;
       });
     };
 
     const decrementActiveIndex = () => {
-      setActiveImageIndexUnsafe((prev) => {
+      setActiveImageIndexInternal((prev) => {
         const next = prev - 1 < 0 ? imagesCount : prev - 1;
         return next;
       });
@@ -128,11 +139,11 @@ export const useReactImageTurntable = ({
       window.removeEventListener('pointerup', handlePointerUp);
       window.removeEventListener('pointermove', handlePointerMove);
     };
-  }, [imagesCount, movementSensitivity]);
+  }, [imagesCount, movementSensitivity, setActiveImageIndexInternal]);
 
   return {
-    activeImageIndex,
-    setActiveImageIndex,
+    activeImageIndex: activeImageIndexInternal,
+    setActiveImageIndex: setActiveImageIndexSafe,
     images,
     ref: turntableRef,
   };

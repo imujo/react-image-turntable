@@ -24,6 +24,8 @@ export interface UseReactImageTurntableProps {
   movementSensitivity?: number;
   /** Callback to trigger whenever the active index changes. */
   onIndexChange?: (index: number) => void;
+  setActiveImageIndex?: React.Dispatch<React.SetStateAction<number>>;
+  activeImageIndex?: number;
 }
 
 export interface UseReactImageTurntableReturn extends Pick<UseReactImageTurntableProps, 'images'> {
